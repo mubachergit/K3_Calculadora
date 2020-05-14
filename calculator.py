@@ -112,6 +112,7 @@ class Controlator(ttk.Frame):
 
 class Display(ttk.Frame):
     value = "0"
+    ant = ''
 
     def __init__(self,parent):
         ttk.Frame.__init__(self, parent, width=272, height=50)
@@ -125,11 +126,27 @@ class Display(ttk.Frame):
         self.lbl.pack(side=TOP, fill=BOTH, expand=True)
 
     def paint(self, algo):
+        if algo == "C":
+            self.value = "0"   
+
+        if algo == ',' and not "," in self.value:
+            self.value += str(algo)
+        
         if algo.isdigit():
             if self.value == "0":
-                self.value = ''
-            self.value += str(algo)
+                self.value = algo
+            else:
+                self.value += str(algo)
+        
+        if algo == "+/-" and self.value != "0":
+            if self.value[0] != "-":
+                self.value = "-" + self.value
+            else:
+                self.value = self.value[1:]
+        
+
         self.lbl.config(text=self.value)
+        self.ant = algo
         
 
 class Selector(ttk.Radiobutton):
