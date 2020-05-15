@@ -117,17 +117,28 @@ class Controlator(ttk.Frame):
     def to_float(self, valor):
         return float(valor.replace(",", "."))
 
+    def to_string(self,valor):
+        valor = str(valor)
+        return valor.replace(".", ",")
+
     def calculate(self):
         if self.operation == "+":
-            return self.op1 + self.op2
-        elif self.opertaion == "-":
-            return self.op1 - self.op2
+            return round(float(self.op1 + self.op2),2)
+        elif self.operation == "-":
+            return round(float(self.op1 - self.op2),2)
         elif self.operation == "x":
-            return self.op1 * self.op2
+            return round(float(self.op1 * self.op2),2)
         elif self.operation == "÷":
-            return self.op1 / self.op2
+            return round(float(self.op1 / self.op2),2)
         
         return self.op2
+
+    def reset(self):
+        self.dispValue = "0"
+        self.op1 = "0"
+        self.op2 = "0"
+        self.operation = "0"
+
 
     def set_operation(self, algo): 
         if algo.isdigit():
@@ -137,28 +148,30 @@ class Controlator(ttk.Frame):
                 self.dispValue += str(algo)
         
         if algo == "C":
-            self.dispValue = "0"  
+            self.reset() 
         
         if algo == "+/-" and self.dispValue != "0":
             if self.dispValue[0] != "-":
-                self.dispValue = "-" + self.dispValue
+                self.dispValue = "-" + self.dispValue[1:]
             else:
-                self.dispValue = self.dispValue[1:]
+                self.dispValue = self.dispValue
         
         if algo == ',' and not "," in self.dispValue:
             self.dispValue += str(algo)
         
-        if algo == "+":
+        if algo == "+" or algo == "-" or algo == "x" or algo == "÷":
             self.op1 = self.to_float(self.dispValue)
             self.operation = algo
             self.dispValue = "0"
-
+               
         if algo == "=":
             self.op2 = self.to_float(self.dispValue)
             res = self.calculate()
-            self.dispValue = str(res)
+            self.dispValue = self.to_string(res)
+        
 
         self.display.paint(self.dispValue)
+
 
 
 class Display(ttk.Frame):
