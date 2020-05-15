@@ -115,8 +115,7 @@ class Controlator(ttk.Frame):
         return float(valor.replace(",", "."))
 
     def to_string(self,valor):
-        valor = str(valor)
-        return valor.replace(".", ",")
+        return str(valor).replace(".", ",")
 
     def calculate(self):
         if self.operation == "+":
