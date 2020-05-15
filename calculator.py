@@ -102,10 +102,7 @@ def pinta(valor):
 class Controlator(ttk.Frame):
     def __init__(self, parent):
         ttk.Frame.__init__(self, parent, width=272, height=300)
-        self.op1 = 0
-        self.op2 = 0
-        self.operation = ''
-        self.dispValue = '0'
+        self.reset()
 
         self.display = Display(self)
         self.display.grid(column=0, row=0, columnspan=4)
@@ -134,11 +131,10 @@ class Controlator(ttk.Frame):
         return self.op2
 
     def reset(self):
-        self.dispValue = "0"
         self.op1 = "0"
         self.op2 = "0"
-        self.operation = "0"
-
+        self.operation = ""
+        self.dispValue = "0"
 
     def set_operation(self, algo): 
         if algo.isdigit():
