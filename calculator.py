@@ -111,6 +111,14 @@ class Controlator(ttk.Frame):
             btn = CalcButton(self, properties['text'], self.set_operation, properties.get("W",1), properties.get("H",1))
             btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W",1), rowspan=properties.get("H",1))
 
+    def reset(self):
+        self.op1 = 0
+        self.op2 = 0
+        self.operation = ""
+        self.dispValue = "0"
+        self.signo_recien_pulsado = False
+
+
     def to_float(self, valor):
         return float(valor.replace(",", "."))
 
@@ -129,15 +137,12 @@ class Controlator(ttk.Frame):
         
         return self.op2
 
-    def reset(self):
-        self.op1 = "0"
-        self.op2 = "0"
-        self.operation = ""
-        self.dispValue = "0"
-
     def set_operation(self, algo): 
         if algo.isdigit():
-            if self.dispValue == "0":
+            if self.dispValue == "0" or self.signo_recien_pulsado:
+                self.op1 = self.to_float(self.dispValue)
+                self.op2 = 0
+
                 self.dispValue = algo
             else:
                 self.dispValue += str(algo)
@@ -146,24 +151,41 @@ class Controlator(ttk.Frame):
             self.reset() 
         
         if algo == "+/-" and self.dispValue != "0":
-            if self.dispValue[0] != "-":
-                self.dispValue = "-" + self.dispValue[1:]
+            if self.dispValue[0] == "-":
+                self.dispValue = self.dispValue[1:]
             else:
-                self.dispValue = self.dispValue
+                self.dispValue = "-" + self.dispValue
         
-        if algo == ',' and not "," in self.dispValue:
+        if algo == ',' and "," not in self.dispValue:
             self.dispValue += str(algo)
         
         if algo == "+" or algo == "-" or algo == "x" or algo == "÷":
-            self.op1 = self.to_float(self.dispValue)
-            self.operation = algo
-            self.dispValue = "0"
-               
+            if self.op1 == 0:
+                self.op1 = self.to_float(self.dispValue)
+                self.operation = algo
+            elif self.op2 == 0:
+                self.op2 = self.to_float(self.dispValue)
+                res = self.calculate()
+                self.dispValue = self.to_string(res)
+                self.operation = algo
+            else:
+                self.op1 = self.to_float(self.dispValue)
+                self.op2 = 0
+                self.operation = algo
+
+            self.signo_recien_pulsado = True
+        else:
+            self.signo_recien_pulsado = False
+
         if algo == "=":
-            self.op2 = self.to_float(self.dispValue)
-            res = self.calculate()
-            self.dispValue = self.to_string(res)
-        
+            if self.op1 != 0 and self.op2 == 0:
+                self.op2 = self.to_float(self.dispValue)
+                res = self.calculate()
+                self.dispValue = self.to_string(res)
+            elif self.op1 != 0 and self.op2 != 0:
+                self.op1 = self.to_float(self.dispValue)
+                res = self.calculate()
+                self.dispValue = self.to_string(res)
 
         self.display.paint(self.dispValue)
 
