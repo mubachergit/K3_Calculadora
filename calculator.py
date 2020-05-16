@@ -117,6 +117,7 @@ class Controlator(ttk.Frame):
         self.operation = ""
         self.dispValue = "0"
         self.signo_recien_pulsado = False
+        self.signo_igual_pulsado = False
 
 
     def to_float(self, valor):
@@ -124,6 +125,8 @@ class Controlator(ttk.Frame):
 
     def to_string(self,valor):
         return str(valor).replace(".", ",")
+    
+    
 
     def calculate(self):
         if self.operation == "+":
@@ -137,6 +140,11 @@ class Controlator(ttk.Frame):
         
         return self.op2
 
+    def int_or_float(self, res):
+        if res == int(res):
+            res = int(res)
+        return res
+
     def set_operation(self, algo): 
         if algo.isdigit():
             if self.dispValue == "0" or self.signo_recien_pulsado:
@@ -146,7 +154,7 @@ class Controlator(ttk.Frame):
                 self.dispValue = algo
             else:
                 self.dispValue += str(algo)
-        
+
         if algo == "C":
             self.reset() 
         
@@ -160,19 +168,22 @@ class Controlator(ttk.Frame):
             self.dispValue += str(algo)
         
         if algo == "+" or algo == "-" or algo == "x" or algo == "÷":
-            if self.op1 == 0:
-                self.op1 = self.to_float(self.dispValue)
-                self.operation = algo
-            elif self.op2 == 0:
-                self.op2 = self.to_float(self.dispValue)
-                res = self.calculate()
-                self.dispValue = self.to_string(res)
-                self.operation = algo
+            if not self.signo_recien_pulsado:
+                if self.op1 == 0:
+                    self.op1 = self.to_float(self.dispValue)
+                    self.operation = algo
+                elif self.op2 == 0:
+                    self.op2 = self.to_float(self.dispValue)
+                    res = self.calculate()
+                    res = self.int_or_float(res)
+                    self.dispValue = self.to_string(res)
+                    self.operation = algo
+                else:
+                    self.op1 = self.to_float(self.dispValue)
+                    self.op2 = 0
+                    self.operation = algo
             else:
-                self.op1 = self.to_float(self.dispValue)
-                self.op2 = 0
                 self.operation = algo
-
             self.signo_recien_pulsado = True
         else:
             self.signo_recien_pulsado = False
@@ -181,12 +192,16 @@ class Controlator(ttk.Frame):
             if self.op1 != 0 and self.op2 == 0:
                 self.op2 = self.to_float(self.dispValue)
                 res = self.calculate()
+                res = self.int_or_float(res)
                 self.dispValue = self.to_string(res)
             elif self.op1 != 0 and self.op2 != 0:
                 self.op1 = self.to_float(self.dispValue)
                 res = self.calculate()
+                res = self.int_or_float(res)
                 self.dispValue = self.to_string(res)
-
+            self.signo_igual_pulsado = True
+        else:
+            self.signo_igual_pulsado = False
         self.display.paint(self.dispValue)
 
 
