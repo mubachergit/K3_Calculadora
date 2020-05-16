@@ -147,14 +147,16 @@ class Controlator(ttk.Frame):
 
     def set_operation(self, algo): 
         if algo.isdigit():
-            if self.dispValue == "0" or self.signo_recien_pulsado:
-                self.op1 = self.to_float(self.dispValue)
-                self.op2 = 0
+            if not self.signo_igual_pulsado:
+                if self.dispValue == "0" or self.signo_recien_pulsado:
+                    self.op1 = self.to_float(self.dispValue)
+                    self.op2 = 0
 
-                self.dispValue = algo
+                    self.dispValue = algo
+                else:
+                    self.dispValue += str(algo)
             else:
-                self.dispValue += str(algo)
-
+                self.dispValue = algo
         if algo == "C":
             self.reset() 
         
@@ -164,8 +166,12 @@ class Controlator(ttk.Frame):
             else:
                 self.dispValue = "-" + self.dispValue
         
-        if algo == ',' and "," not in self.dispValue:
-            self.dispValue += str(algo)
+        if algo == ',':
+            if self.signo_igual_pulsado:
+                self.dispValue = "0"
+                self.dispValue += str(algo)
+            elif "," not in self.dispValue:
+                self.dispValue += str(algo)
         
         if algo == "+" or algo == "-" or algo == "x" or algo == "÷":
             if not self.signo_recien_pulsado:
