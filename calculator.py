@@ -112,12 +112,11 @@ class Controlator(ttk.Frame):
             btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W",1), rowspan=properties.get("H",1))
 
     def reset(self):
-        self.op1 = 0
-        self.op2 = 0
+        self.op1 = None
+        self.op2 = None
         self.operation = ""
         self.dispValue = "0"
         self.signo_recien_pulsado = False
-        self.signo_igual_pulsado = False
 
 
     def to_float(self, valor):
@@ -126,8 +125,6 @@ class Controlator(ttk.Frame):
     def to_string(self,valor):
         return str(valor).replace(".", ",")
     
-    
-
     def calculate(self):
         if self.operation == "+":
             return round(float(self.op1 + self.op2),2)
@@ -140,23 +137,15 @@ class Controlator(ttk.Frame):
         
         return self.op2
 
-    def int_or_float(self, res):
-        if res == int(res):
-            res = int(res)
-        return res
-
     def set_operation(self, algo): 
         if algo.isdigit():
-            if not self.signo_igual_pulsado:
-                if self.dispValue == "0" or self.signo_recien_pulsado:
-                    self.op1 = self.to_float(self.dispValue)
-                    self.op2 = 0
-
-                    self.dispValue = algo
-                else:
-                    self.dispValue += str(algo)
-            else:
+            if self.dispValue == "0" or self.signo_recien_pulsado:
+                self.op1 = self.to_float(self.dispValue)
+                self.op2 = None
                 self.dispValue = algo
+            else:
+                self.dispValue += str(algo)
+
         if algo == "C":
             self.reset() 
         
@@ -166,48 +155,35 @@ class Controlator(ttk.Frame):
             else:
                 self.dispValue = "-" + self.dispValue
         
-        if algo == ',':
-            if self.signo_igual_pulsado:
-                self.dispValue = "0"
-                self.dispValue += str(algo)
-            elif "," not in self.dispValue:
-                self.dispValue += str(algo)
+        if algo == ',' and "," not in self.dispValue:
+            self.dispValue += str(algo)
         
         if algo == "+" or algo == "-" or algo == "x" or algo == "÷":
-            if not self.signo_recien_pulsado:
-                if self.op1 == 0:
-                    self.op1 = self.to_float(self.dispValue)
-                    self.operation = algo
-                elif self.op2 == 0:
-                    self.op2 = self.to_float(self.dispValue)
-                    res = self.calculate()
-                    res = self.int_or_float(res)
-                    self.dispValue = self.to_string(res)
-                    self.operation = algo
-                else:
-                    self.op1 = self.to_float(self.dispValue)
-                    self.op2 = 0
-                    self.operation = algo
+            if self.op1 == None:
+                self.op1 = self.to_float(self.dispValue)
+                self.operation = algo
+            elif self.op2 == None:
+                self.op2 = self.to_float(self.dispValue)
+                res = self.calculate()
+                self.dispValue = self.to_string(res)
+                self.operation = algo
             else:
+                self.op1 = self.to_float(self.dispValue)
+                self.op2 = None
                 self.operation = algo
             self.signo_recien_pulsado = True
         else:
             self.signo_recien_pulsado = False
 
         if algo == "=":
-            if self.op1 != 0 and self.op2 == 0:
+            if self.op1 != None and self.op2 == None:
                 self.op2 = self.to_float(self.dispValue)
                 res = self.calculate()
-                res = self.int_or_float(res)
                 self.dispValue = self.to_string(res)
-            elif self.op1 != 0 and self.op2 != 0:
+            elif self.op1 != None and self.op2 != None:
                 self.op1 = self.to_float(self.dispValue)
                 res = self.calculate()
-                res = self.int_or_float(res)
                 self.dispValue = self.to_string(res)
-            self.signo_igual_pulsado = True
-        else:
-            self.signo_igual_pulsado = False
         self.display.paint(self.dispValue)
 
 
