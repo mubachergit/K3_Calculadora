@@ -175,15 +175,16 @@ class Controlator(ttk.Frame):
     def __init__(self, parent):
         ttk.Frame.__init__(self, parent, width=272, height=300)
         self.reset()
+        self.status = "N"
 
         self.display = Display(self)
         self.display.grid(column=0, row=0)
 
-        self.keyboard = Keyboard(self, "R")
+        self.keyboard = Keyboard(self, self.set_operation, self.status)
         self.keyboard.grid(column=0, row=1)
 
-
-
+        self.selector = Selector(self.keyboard, self.change_status, self.status)
+        self.selector.grid(column=0, row=1)
 
     def reset(self):
         self.op1 = None
@@ -191,7 +192,6 @@ class Controlator(ttk.Frame):
         self.operation = ""
         self.dispValue = "0"
         self.signo_recien_pulsado = False
-
 
     def to_float(self, valor):
         return float(valor.replace(",", "."))
@@ -211,7 +211,10 @@ class Controlator(ttk.Frame):
         
         return self.op2
 
-    def set_operation(self, algo): 
+    def set_operation(self, algo):
+        if self.status == "R":
+            print("Funcionalidad Romana en desarrollo")
+            return 
         if algo.isdigit():
             if self.dispValue == "0" or self.signo_recien_pulsado:
                 self.op1 = self.to_float(self.dispValue)
@@ -260,6 +263,13 @@ class Controlator(ttk.Frame):
                 self.dispValue = self.to_string(res)
         self.display.paint(self.dispValue)
 
+    def change_status(self, status):
+        self.status = status
+        self.keyboard.status = status
+        self.reset()
+
+
+
 
 
 class Display(ttk.Frame):
@@ -282,11 +292,12 @@ class Display(ttk.Frame):
         
 
 class Selector(ttk.Frame):
-    def __init__(self, parent, status="N"):
+    def __init__(self, parent, command, status="N"):
         ttk.Frame.__init__(self, parent, width=68, height=50)
         self.status = status
         self.__value = StringVar()
         self.__value.set(self.status)
+        self.command = command
 
         radiob1 = ttk.Radiobutton(self, text="N", value="N",name='rbtn_normal', variable=self.__value, command=self.__click)
         radiob1.place(x=0, y =5)
@@ -295,14 +306,15 @@ class Selector(ttk.Frame):
 
     def __click(self):
         self.status = self.__value.get()
-
-
+        self.command(self.status)
+ 
 class Keyboard(ttk.Frame):
-    def __init__(self, parent, status="N"):
+    def __init__(self, parent, command, status="N"):
         ttk.Frame.__init__(self, parent, height=250, width=272)
         self.__status = status
         self.listaBRomanos = []
         self.listaBNormales = []
+        self.command = command
         
         if self.__status == "N":
             self.pintaNormal()
@@ -324,27 +336,27 @@ class Keyboard(ttk.Frame):
     def pintaNormal(self):
         if len(self.listaBNormales) == 0:
             for properties in normal_buttons:
-                btn = CalcButton(self, properties['text'], None, properties.get("W",1), properties.get("H",1))
+                btn = CalcButton(self, properties['text'], self.command, properties.get("W", 1), properties.get("H", 1))
                 self.listaBNormales.append((btn, properties))
                 btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W",1), rowspan=properties.get("H",1))
         else:
             for btn, properties in self.listaBNormales:
                 btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W",1), rowspan=properties.get("H",1))
 
-        for btn, properties in self.listaBNormales:
-            btn.grid_forget()
+        for borra, properties in self.listaBRomanos:
+            borra.grid_forget()
 
     def pintaRomano(self):
         if len(self.listaBRomanos) == 0:
             for properties in roman_buttons:
-                btn = CalcButton(self, properties['text'], None, properties.get("W",1), properties.get("H",1))
+                btn = CalcButton(self, properties['text'], self.command, properties.get("W",1), properties.get("H",1))
                 self.listaBRomanos.append((btn, properties))
                 btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W",1), rowspan=properties.get("H",1))
         else:
             for btn, properties in self.listaBRomanos:
                 btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W",1), rowspan=properties.get("H",1))
 
-        for btn, properties in self.listaBRomanos:
+        for btn, properties in self.listaBNormales:
             btn.grid_forget()
 
 

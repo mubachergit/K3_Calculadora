@@ -35,6 +35,7 @@ class TestKeyboard(tkinterTestCase.TkTestCase):
             self.assertIsInstance(btn, calculator.CalcButton)
         self.assertEqual(len(teclado_romano.children), 13)
         self.assertEqual(len(teclado_romano.listaBRomanos), 13)
+        self.assertEqual(len(teclado_romano.listaBNormales), 0)
 
 
         teclado_romano.update()
